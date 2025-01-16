@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음악 커뮤니티 - 홈</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #bbb 1px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            overflow: hidden;
+        }
+        header li {
+            float: left;
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        header #branding {
+            float: left;
+        }
+        header #branding h1 {
+            margin: 0;
+        }
+        header nav {
+            float: right;
+            margin-top: 10px;
+        }
+        header .highlight, header .current a {
+            color: #e8491d;
+            font-weight: bold;
+        }
+        header a:hover {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        #showcase {
+            min-height: 400px;
+            background: url('https://source.unsplash.com/random/1600x900/?music') no-repeat center center/cover;
+            text-align: center;
+            color: #ffffff;
+        }
+        #showcase h1 {
+            margin-top: 100px;
+            font-size: 55px;
+            margin-bottom: 10px;
+        }
+        #showcase p {
+            font-size: 20px;
+        }
+        #main {
+            float: left;
+            width: 70%;
+            padding: 0 30px;
+            box-sizing: border-box;
+        }
+        #sidebar {
+            float: right;
+            width: 30%;
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        article.post {
+            background: #fff;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        @media(max-width: 768px) {
+            header #branding,
+            header nav,
+            header nav li,
+            #main,
+            #sidebar {
+                float: none;
+                text-align: center;
+                width: 100%;
+            }
+            header {
+                padding-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div id="branding">
+            <h1>
+                <span class="highlight">Digger</span>
+            </h1>
+        </div>
+        <nav>
+            <ul>
+                <li class="current"><a href="/">홈</a></li>
+                <li><a href="/genres">장르</a></li>
+                <li><a href="/artists">아티스트</a></li>
+                <li><a href="/forum">포럼</a></li>
+                <li><a href="/about">소개</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section id="showcase">
+    <div class="container">
+        <h1>디깅 커뮤니티</h1>
+        <p>다양한 장르, 아티스트에 대해 이야기를 나누고 새로운 음악을 발견하세요.</p>
+    </div>
+</section>
+
+<div class="container">
+    <section id="main">
+        <h2>최근 게시물</h2>
+        <div th:each="post : ${recentPosts}">
+            <article class="post">
+                <h3 th:text="${post.title}">게시물 제목</h3>
+                <p th:text="${#strings.abbreviate(post.content, 200)}">게시물 내용...</p>
+                <small th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</small>
+                <a th:href="@{'/posts/' + ${post.id}}">더 보기</a>
+            </article>
+        </div>
+    </section>
+
+    <aside id="sidebar">
+        <h3>인기 태그</h3>
+        <ul>
+            <li th:each="tag : ${popularTags}">
+                <a th:href="@{'/tags/' + ${tag.name}}" th:text="${tag.name}">태그 이름</a>
+            </li>
+        </ul>
+        <h3>이번 주 인기 아티스트</h3>
+        <ul>
+            <li th:each="artist : ${popularArtists}">
+                <a th:href="@{'/artists/' + ${artist.id}}" th:text="${artist.name}">아티스트 이름</a>
+            </li>
+        </ul>
+    </aside>
+</div>
+
+<footer>
+    <p>&copy; 2023 음악 커뮤니티. All rights reserved.</p>
+</footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const recentPosts = /*[[${recentPosts}]]*/ [];
+    const popularTags = /*[[${popularTags}]]*/ [];
+    const popularArtists = /*[[${popularArtists}]]*/ [];
+    console.log('Recent Posts:', recentPosts);
+    console.log('Popular Tags:', popularTags);
+    console.log('Popular Artists:', popularArtists);
+    /*]]>*/
+</script>
+</body>
+</html>
