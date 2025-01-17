@@ -52,11 +52,7 @@ public class UserService {
         // 리프레시 토큰 저장
         refreshTokenStore.put(email, refreshToken);
 
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", accessToken);
-        tokens.put("refreshToken", refreshToken);
-
-        return tokens;
+        return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
     }
 
     public String refreshAccessToken(String email, String refreshToken) {
@@ -64,6 +60,10 @@ public class UserService {
 
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
             throw new RuntimeException("리프레시 토큰이 유효하지 않습니다.");
+        }
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new RuntimeException("리프레시 토큰이 만료되었습니다.");
         }
 
         // 새 액세스 토큰 발급
