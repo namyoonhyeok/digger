@@ -1,14 +1,12 @@
 package com.example.digger.user;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.Map;
+
+@RestController
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -18,38 +16,35 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/register")
-    public String showRegisterForm(Model model) {
-        model.addAttribute("userDTO", new UserDTO());
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String registerUser(@ModelAttribute UserDTO userDTO, RedirectAttributes redirectAttributes) {
-        boolean isRegistered = userService.registerUser(userDTO);
-
-        if (!isRegistered) {
-            redirectAttributes.addFlashAttribute("error", "이미 등록된 이메일입니다.");
-            return "redirect:/api/user/register";
+    @PostMapping("/join")
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        try {
+            String accessToken = userService.joinUser(userDTO);
+            return ResponseEntity.ok(Map.of("message", "회원가입 성공", "accessToken", accessToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
-        return "redirect:/api/user/login";
-    }
-
-    @GetMapping("/login")
-    public String showLoginForm(Model model) {
-        model.addAttribute("userDTO", new UserDTO());
-        return "login";
     }
 
     @PostMapping("/login")
-    public String loginUser(@ModelAttribute UserDTO userDTO,RedirectAttributes redirectAttributes, Model model) {
+    public ResponseEntity<?> loginUser(@RequestBody UserDTO userDTO) {
         try {
-            User user = userService.login(userDTO.getEmail(), userDTO.getPassword());
-            model.addAttribute("user", user);
-            return "redirect:/api/home";
+            Map<String, String> tokens = userService.login(userDTO.getEmail(), userDTO.getPassword());
+            return ResponseEntity.ok(tokens); // accessToken과 refreshToken 반환
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/api/user/login";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String refreshToken = request.get("refreshToken");
+            String newAccessToken = userService.refreshAccessToken(email, refreshToken);
+            return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 }

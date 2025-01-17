@@ -9,3 +9,10 @@ spring:
     url: jdbc:mysql://localhost:3306/digger
     username: root
     password: yoonheuk7723
+  thymeleaf:
+    cache: false
+
+jwt:
+  secret: XyP3j@2yH8lK7oR9cN#fLz^aWqMvTb&4pQgYxDs%Z!
+  access-token-expiration: 900000  # 액세스 토큰 만료 시간 (15분 = 900,000ms)
+  refresh-token-expiration: 604800000  # 리프레시 토큰 만료 시간 (7일 = 7 * 24 * 60 * 60 * 1000ms)
